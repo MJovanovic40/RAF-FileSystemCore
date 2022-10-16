@@ -1,7 +1,10 @@
 package main;
 
+import module.FileSystemCore;
+import module.FileSystemCoreImplementation;
+
 public class Main {
     public static void main(String[] args){
-        System.out.println("test");
+        FileSystemCore fileSystemCore = new FileSystemCoreImplementation();
     }
 }
