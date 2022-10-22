@@ -161,12 +161,23 @@ public class FilesController implements FSOController{
         return targetFile.renameTo(new File(newPath));
     }
 
-
+    /**
+     * Get file extension
+     *
+     * @param path an absoulte storage path to the target file
+     * @return String - file extension
+     */
     private String getExtenstion(String path){
         String[] pathComponents = path.split("\\.");
         return pathComponents[pathComponents.length-1];
     }
 
+    /**
+     * Counts files (and not directories) from provided directory and all subdirectories
+     *
+     * @param directory a file to the directory from where to count files
+     * @return int - number of files from the provided directory and all subdirectories
+     */
     private static int getFilesCount(File directory) {
         File[] files = directory.listFiles();
         int count = 0;
