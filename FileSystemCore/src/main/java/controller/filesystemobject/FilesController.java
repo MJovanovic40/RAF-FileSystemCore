@@ -22,8 +22,7 @@ public class FilesController implements FSOController{
         Uploads a file to the Storage
 
         @param targetPath an absolute path to the file to be uploaded
-        @param uploadPath a path to a directory relative to the storage
-        root (including "/") where the file will be uploaded
+        @param uploadPath a relative storage path where the file will be uploaded
         @return true if the file is uploaded successfully - false if the file is not uploaded
      */
     @Override
@@ -97,9 +96,25 @@ public class FilesController implements FSOController{
         return false;
     }
 
+    /**
+     * Deletes a file from storage
+     *
+     * @param path a relative storage path to the file
+     * @return true if file is deleted - false if file is not deleted
+     */
     @Override
     public boolean delete(String path) {
-        return false;
+        /*
+            Check if file exists
+            Delete file
+         */
+
+        File targetFile = new File(this.rootStorageLocation + path);
+
+        if(!targetFile.exists())
+            return false;
+
+        return targetFile.delete();
     }
 
     @Override
