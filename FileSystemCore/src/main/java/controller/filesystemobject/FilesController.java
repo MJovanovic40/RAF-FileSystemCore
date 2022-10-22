@@ -28,13 +28,6 @@ public class FilesController implements FSOController{
     @Override
 
     public boolean upload(String targetPath, String uploadPath) {
-        /*
-            Check if input is correct and if provided file and directory exists
-            Get file metadata
-            Check file against configuration
-            Resolve naming conflicts
-            Upload File
-         */
         File targetFile = new File(targetPath);
         File targetDirectory = new File(rootStorageLocation + uploadPath); // Predpostavljamo da ce uploadPath imati "/" na pocetku
 
@@ -104,10 +97,6 @@ public class FilesController implements FSOController{
      */
     @Override
     public boolean delete(String path) {
-        /*
-            Check if file exists
-            Delete file
-         */
 
         File targetFile = new File(this.rootStorageLocation + path);
 
@@ -117,9 +106,33 @@ public class FilesController implements FSOController{
         return targetFile.delete();
     }
 
+    /**
+     * Moves a file to another location within the storage
+     *
+     * @param targetPath a relavtive storage path to a file
+     * @param movePath a relative storage path to the target directory
+     * @return true if the file is moved - false if the file fails to move
+     */
     @Override
     public boolean move(String targetPath, String movePath) {
-        return false;
+
+        File targetFile = new File(this.rootStorageLocation + targetPath);
+        File moveDir = new File(this.rootStorageLocation + movePath);
+
+
+        if(!targetFile.exists() || !targetFile.isFile() || !moveDir.exists() || !moveDir.isDirectory()){
+            return false;
+        }
+
+        File finalFile = new File(moveDir.toPath() + "/" + targetFile.getName());
+
+        try {
+            Files.move(targetFile.toPath(), finalFile.toPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return true;
     }
 
     @Override
