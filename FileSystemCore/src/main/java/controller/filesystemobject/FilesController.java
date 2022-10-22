@@ -23,7 +23,7 @@ public class FilesController implements FSOController{
 
         @param targetPath an absolute path to the file to be uploaded
         @param uploadPath an absolute storage path where the file will be uploaded
-        @return true if the file is uploaded successfully - false if the file is not uploaded
+        @return true if the file is uploaded successfully, false otherwise
      */
     @Override
 
@@ -36,8 +36,8 @@ public class FilesController implements FSOController{
         }
 
         //Check configuration
-        String extension = this.getExtenstion(targetPath);
-        long fileSize = 0;
+        String extension = this.getExtension(targetPath);
+        long fileSize;
         try {
             fileSize = Files.size(targetFile.toPath());
         } catch (IOException e) {
@@ -80,9 +80,41 @@ public class FilesController implements FSOController{
         return true;
     }
 
+    /**
+     * Downloads a file from the storage to a specified location
+     *
+     * @param targetPath an absolute storage path to the file for download
+     * @param downloadPath an absolute path to the download location (outside the storage)
+     * @return true if the file is downloaded, false otherwise
+     */
     @Override
     public boolean download(String targetPath, String downloadPath) {
-        return false;
+        File targetFile = new File(this.rootStorageLocation + targetPath);
+        File downloadFile = new File(downloadPath);
+
+        if(!targetFile.exists() || !targetFile.isFile() || !downloadFile.exists() || !downloadFile.isDirectory()){ //Validate input
+            return false;
+        }
+
+        Path finalPath = Paths.get(downloadFile + "/" + targetFile.getName());
+
+        if(finalPath.toFile().exists()){ // Workaround to support uploading files with the same name
+            int c = 1;
+            String extension = getExtension(finalPath.toString());
+            Path tempPath = finalPath;
+            while(tempPath.toFile().exists()){
+                tempPath = Paths.get(finalPath.toString().substring(0, finalPath.toString().length() - (extension.length() + 1)) + "(" + c + ")." + extension);
+                c++;
+            }
+            finalPath = tempPath;
+        }
+
+        try {
+            Files.copy(targetFile.toPath(), finalPath); // Download
+            return true;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -90,7 +122,7 @@ public class FilesController implements FSOController{
      *
      * @param name the name of the new file
      * @param path an absolute storage path to the new file's directory
-     * @return true if the file is created - false otherwise
+     * @return true if the file is created, false otherwise
      */
     @Override
     public boolean create(String name, String path) {
@@ -100,7 +132,7 @@ public class FilesController implements FSOController{
 
         String newPath = this.rootStorageLocation + path + "/" + name;
 
-        String extension = getExtenstion(newPath);
+        String extension = getExtension(newPath);
 
         //Check configuration
         //We don't need to check for file size because a newly created file will always be 0 bytes
@@ -129,7 +161,7 @@ public class FilesController implements FSOController{
      * Deletes a file from storage
      *
      * @param path an absolute storage path to the file
-     * @return true if file is deleted - false if file is not deleted
+     * @return true if file is deleted, false otherwise
      */
     @Override
     public boolean delete(String path) {
@@ -147,7 +179,7 @@ public class FilesController implements FSOController{
      *
      * @param targetPath an absolute storage path to the file
      * @param movePath an absolute storage path to the target directory
-     * @return true if the file is moved - false if the file fails to move
+     * @return true if the file is moved, false otherwise
      */
     @Override
     public boolean move(String targetPath, String movePath) {
@@ -176,7 +208,7 @@ public class FilesController implements FSOController{
      *
      * @param path an absolute storage path to the file
      * @param name a new file name (with extension)
-     * @return true if the file is renamed - false if the file fails to be renamed
+     * @return true if the file is renamed, false otherwise
      */
     @Override
     public boolean rename(String path, String name) {
@@ -189,7 +221,7 @@ public class FilesController implements FSOController{
 
         String newPath = targetFile.toString().replace(targetFile.getName(), name); // Create a new path with the new file name
 
-        if(this.configuration.getForbiddenExtensions().contains(getExtenstion(newPath))){ // Check if the new name (mainly extension) fits the configuration settings
+        if(this.configuration.getForbiddenExtensions().contains(getExtension(newPath))){ // Check if the new name (mainly extension) fits the configuration settings
             return false;
         }
 
@@ -199,10 +231,10 @@ public class FilesController implements FSOController{
     /**
      * Get file extension
      *
-     * @param path an absoulte storage path to the target file
+     * @param path an absolute storage path to the target file
      * @return String - file extension
      */
-    private String getExtenstion(String path){
+    private String getExtension(String path){
         String[] pathComponents = path.split("\\.");
 
         if(pathComponents.length == 1){
