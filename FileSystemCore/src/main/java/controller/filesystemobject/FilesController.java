@@ -85,9 +85,44 @@ public class FilesController implements FSOController{
         return false;
     }
 
+    /**
+     * Creates a new file
+     *
+     * @param name the name of the new file
+     * @param path an absolute storage path to the new file's directory
+     * @return true if the file is created - false otherwise
+     */
     @Override
     public boolean create(String name, String path) {
-        return false;
+        if(name.isEmpty() || path.isEmpty()){
+            return false;
+        }
+
+        String newPath = this.rootStorageLocation + path + "/" + name;
+
+        String extension = getExtenstion(newPath);
+
+        //Check configuration
+        //We don't need to check for file size because a newly created file will always be 0 bytes
+        if(extension.isEmpty() || this.configuration.getForbiddenExtensions().contains(extension)){ // Check extension
+            return false;
+        }
+
+        if(getFilesCount(new File(this.rootStorageLocation)) >= this.configuration.getMaximumNumberOfFiles()){ // Check if the file is allowed to be created
+            return false;
+        }
+
+        File newFile = new File(newPath);
+
+        if(newFile.exists()){ //Check if file already exists
+            return false;
+        }
+
+        try {
+            return newFile.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -169,6 +204,11 @@ public class FilesController implements FSOController{
      */
     private String getExtenstion(String path){
         String[] pathComponents = path.split("\\.");
+
+        if(pathComponents.length == 1){
+            return "";
+        }
+
         return pathComponents[pathComponents.length-1];
     }
 
