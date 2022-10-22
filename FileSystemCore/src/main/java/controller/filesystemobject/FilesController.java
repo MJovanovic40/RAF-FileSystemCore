@@ -10,8 +10,8 @@ import java.nio.file.Paths;
 
 public class FilesController implements FSOController{
 
-    private String rootStorageLocation;
-    private Configuration configuration;
+    private final String rootStorageLocation;
+    private final Configuration configuration;
 
     public FilesController(String rootStorageLocation, Configuration configuration){
         this.rootStorageLocation = rootStorageLocation;
@@ -22,7 +22,7 @@ public class FilesController implements FSOController{
         Uploads a file to the Storage
 
         @param targetPath an absolute path to the file to be uploaded
-        @param uploadPath a relative storage path where the file will be uploaded
+        @param uploadPath an absolute storage path where the file will be uploaded
         @return true if the file is uploaded successfully - false if the file is not uploaded
      */
     @Override
@@ -31,8 +31,9 @@ public class FilesController implements FSOController{
         File targetFile = new File(targetPath);
         File targetDirectory = new File(rootStorageLocation + uploadPath); // Predpostavljamo da ce uploadPath imati "/" na pocetku
 
-        if(!targetFile.exists() || !targetFile.isFile() ||
-                !targetDirectory.exists() || !targetDirectory.isDirectory()) return false;
+        if(!targetFile.exists() || !targetFile.isFile() || !targetDirectory.exists() || !targetDirectory.isDirectory()) { //Validate input
+            return false;
+        }
 
         //Check configuration
         String extension = this.getExtenstion(targetPath);
@@ -60,7 +61,7 @@ public class FilesController implements FSOController{
         }
 
         Path finalPath = Paths.get(targetDirectory.toPath() + "/" + targetFile.toPath().getFileName());
-        if(finalPath.toFile().exists()){ // Resavanje upload-a istih fileova
+        if(finalPath.toFile().exists()){ // Workaround to support uploading files with the same name
             int c = 1;
             Path tempPath = finalPath;
             while(tempPath.toFile().exists()){
@@ -72,7 +73,7 @@ public class FilesController implements FSOController{
 
 
         try {
-            Files.copy(targetFile.toPath(), finalPath); // Upload file-a
+            Files.copy(targetFile.toPath(), finalPath); // Upload file
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -92,7 +93,7 @@ public class FilesController implements FSOController{
     /**
      * Deletes a file from storage
      *
-     * @param path a relative storage path to the file
+     * @param path an absolute storage path to the file
      * @return true if file is deleted - false if file is not deleted
      */
     @Override
@@ -100,7 +101,7 @@ public class FilesController implements FSOController{
 
         File targetFile = new File(this.rootStorageLocation + path);
 
-        if(!targetFile.exists())
+        if(!targetFile.exists()) // Validate input
             return false;
 
         return targetFile.delete();
@@ -109,8 +110,8 @@ public class FilesController implements FSOController{
     /**
      * Moves a file to another location within the storage
      *
-     * @param targetPath a relavtive storage path to a file
-     * @param movePath a relative storage path to the target directory
+     * @param targetPath an absolute storage path to the file
+     * @param movePath an absolute storage path to the target directory
      * @return true if the file is moved - false if the file fails to move
      */
     @Override
@@ -120,7 +121,7 @@ public class FilesController implements FSOController{
         File moveDir = new File(this.rootStorageLocation + movePath);
 
 
-        if(!targetFile.exists() || !targetFile.isFile() || !moveDir.exists() || !moveDir.isDirectory()){
+        if(!targetFile.exists() || !targetFile.isFile() || !moveDir.exists() || !moveDir.isDirectory()){ // Validate input
             return false;
         }
 
@@ -135,9 +136,29 @@ public class FilesController implements FSOController{
         return true;
     }
 
+    /**
+     * Renames the provided file to the provided name
+     *
+     * @param path an absolute storage path to the file
+     * @param name a new file name (with extension)
+     * @return true if the file is renamed - false if the file fails to be renamed
+     */
     @Override
     public boolean rename(String path, String name) {
-        return false;
+
+        File targetFile = new File(this.rootStorageLocation + path);
+
+        if(!targetFile.exists() || !targetFile.isFile() || name.isEmpty()){ // Validate input
+            return false;
+        }
+
+        String newPath = targetFile.toString().replace(targetFile.getName(), name); // Create a new path with the new file name
+
+        if(this.configuration.getForbiddenExtensions().contains(getExtenstion(newPath))){ // Check if the new name (mainly extension) fits the configuration settings
+            return false;
+        }
+
+        return targetFile.renameTo(new File(newPath));
     }
 
 
