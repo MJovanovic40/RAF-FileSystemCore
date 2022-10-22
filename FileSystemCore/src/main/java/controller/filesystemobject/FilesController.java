@@ -221,6 +221,9 @@ public class FilesController implements FSOController{
     private static int getFilesCount(File directory) {
         File[] files = directory.listFiles();
         int count = 0;
+        if(files == null){
+            return count;
+        }
         for (File f : files)
             if (f.isDirectory())
                 count += getFilesCount(f);
