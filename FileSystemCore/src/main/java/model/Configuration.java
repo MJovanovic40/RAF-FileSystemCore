@@ -1,10 +1,15 @@
 package model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
+@Getter
+@Setter
 public class Configuration {
 
     /*
@@ -82,30 +87,6 @@ public class Configuration {
             }
         }
 
-    }
-
-    public int getStorageSize() {
-        return storageSize;
-    }
-
-    public void setStorageSize(int storageSize) {
-        this.storageSize = storageSize;
-    }
-
-    public int getMaximumNumberOfFiles() {
-        return maximumNumberOfFiles;
-    }
-
-    public void setMaximumNumberOfFiles(int maximumNumberOfFiles) {
-        this.maximumNumberOfFiles = maximumNumberOfFiles;
-    }
-
-    public List<String> getForbiddenExtensions() {
-        return forbiddenExtensions;
-    }
-
-    public void setForbiddenExtensions(List<String> forbiddenExtensions) {
-        this.forbiddenExtensions = forbiddenExtensions;
     }
 
     public String toString(){
