@@ -11,9 +11,11 @@ import java.util.List;
 
 public class FileSystemCoreImplementation implements FileSystemCore{
 
-    private Path storagePath;
+    private final Path storagePath;
 
-    private Configuration configuration;
+    private final Configuration configuration;
+
+    private FSOController filesController;
 
     public FileSystemCoreImplementation(){
         String desktopPath = System.getProperty("user.home") + "/Desktop";
@@ -23,15 +25,7 @@ public class FileSystemCoreImplementation implements FileSystemCore{
         this.storagePath = Paths.get(desktopPath + "/" + storageFolderName); // Default path je na desktop-u
         initialize();
 
-        //FSOController fsoController = new FilesController(this.storagePath.toString(), this.configuration);
 
-        //boolean isUploaded = fsoController.upload("D:\\RuDok.zip","/");
-        //boolean isDeleted = fsoController.delete("/RuDok.zip");
-        //boolean isMoved = fsoController.move("/RuDok.zip", "/test");
-        //boolean isRenamed = fsoController.rename("/Rudok2.pdf", "RuDok.zip");
-        //boolean isCreated = fsoController.create("test.txt", "/");
-        //boolean isDownloaded = fsoController.download("/RuDok.zip", "C:\\Users\\Milan\\Desktop");
-        //System.out.println(isUploaded);
     }
     public FileSystemCoreImplementation(String path){
         this.configuration = new Configuration();
@@ -47,7 +41,7 @@ public class FileSystemCoreImplementation implements FileSystemCore{
         initialize();
     }
 
-    public FileSystemCoreImplementation(int storageSize, List<String> forbiddenExtensions, int maximumNumberOfFiles, String path){
+    public FileSystemCoreImplementation(String path, int storageSize, List<String> forbiddenExtensions, int maximumNumberOfFiles){
         this.configuration = new Configuration(storageSize, forbiddenExtensions, maximumNumberOfFiles);
         this.storagePath = Paths.get(path);
         initialize();
@@ -57,11 +51,45 @@ public class FileSystemCoreImplementation implements FileSystemCore{
     private void initialize() {
         File storageFile = storagePath.toFile();
         if(!storageFile.exists()) {
-            storageFile.mkdir();
+            if(!storageFile.mkdir()){
+                return;
+            }
         }
 
         this.configuration.load(this.storagePath.toString());
 
-        System.out.println(this.configuration.toString());
+        this.filesController = new FilesController(this.storagePath.toString(), this.configuration);
+
+        System.out.println(this.configuration);
+    }
+
+    @Override
+    public boolean uploadFile(String targetPath, String uploadPath) {
+        return this.filesController.upload(targetPath, uploadPath);
+    }
+
+    @Override
+    public boolean downloadFile(String targetPath, String downloadPath) {
+        return this.filesController.download(targetPath, downloadPath);
+    }
+
+    @Override
+    public boolean createFile(String name, String path) {
+        return this.filesController.create(name, path);
+    }
+
+    @Override
+    public boolean deleteFile(String path) {
+        return this.filesController.delete(path);
+    }
+
+    @Override
+    public boolean moveFile(String targetPath, String movePath) {
+        return this.filesController.move(targetPath, movePath);
+    }
+
+    @Override
+    public boolean renameFile(String path, String name) {
+        return this.filesController.rename(path, name);
     }
 }
