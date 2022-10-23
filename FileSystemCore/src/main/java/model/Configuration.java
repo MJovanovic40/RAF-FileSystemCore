@@ -57,10 +57,13 @@ public class Configuration {
                 for(int i = 0; i < keys.size(); i++){
                     switch(keys.get(i)){
                         case "size":
-                            System.out.println(configFileContents.get(keys.get(i)));
                             this.storageSize = Integer.parseInt(configFileContents.get(keys.get(i)));
                             break;
                         case "forbiddenExtensions":
+                            if(configFileContents.get(keys.get(i)).equals("0")){
+                                this.forbiddenExtensions = new ArrayList<>();
+                                break;
+                            }
                             String[] extensions = configFileContents.get(keys.get(i)).split(",");
                             this.forbiddenExtensions = Arrays.asList(extensions);
                             break;
@@ -77,8 +80,18 @@ public class Configuration {
             try {
                 if(configurationFile.createNewFile()){
                     FileWriter fw = new FileWriter(configurationFile);
+                    StringBuilder extensions = new StringBuilder();
+                    for(int i = 0; i < this.forbiddenExtensions.size(); i++){
+                        if(i != 0){
+                            extensions.append(',');
+                        }
+                        extensions.append(this.forbiddenExtensions.get(i));
+                    }
+                    if(extensions.toString().isEmpty()){
+                        extensions.append("0");
+                    }
                     fw.write("size=" + this.storageSize + "\n" +
-                            "forbiddenExtensions=exe\n" +
+                            "forbiddenExtensions=" + extensions + "\n" +
                             "maximumNumberOfFiles=" + this.maximumNumberOfFiles);
                     fw.close();
                 }
