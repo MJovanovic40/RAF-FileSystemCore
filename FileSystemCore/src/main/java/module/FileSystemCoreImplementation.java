@@ -1,5 +1,7 @@
 package module;
 
+import controller.filesystemobject.FSOController;
+import controller.filesystemobject.FilesController;
 import model.Configuration;
 
 import java.io.File;
@@ -20,6 +22,16 @@ public class FileSystemCoreImplementation implements FileSystemCore{
         this.configuration = new Configuration();
         this.storagePath = Paths.get(desktopPath + "/" + storageFolderName); // Default path je na desktop-u
         initialize();
+
+        //FSOController fsoController = new FilesController(this.storagePath.toString(), this.configuration);
+
+        //boolean isUploaded = fsoController.upload("D:\\RuDok.zip","/");
+        //boolean isDeleted = fsoController.delete("/RuDok.zip");
+        //boolean isMoved = fsoController.move("/RuDok.zip", "/test");
+        //boolean isRenamed = fsoController.rename("/Rudok2.pdf", "RuDok.zip");
+        //boolean isCreated = fsoController.create("test.txt", "/");
+        //boolean isDownloaded = fsoController.download("/RuDok.zip", "C:\\Users\\Milan\\Desktop");
+        //System.out.println(isUploaded);
     }
     public FileSystemCoreImplementation(String path){
         this.configuration = new Configuration();
