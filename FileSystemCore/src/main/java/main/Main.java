@@ -22,10 +22,12 @@ public class Main {
         String rootLocation = "C:\\Users\\pc\\Desktop\\raf_storage\\";
         FoldersController fc = new FoldersController(rootLocation, new Configuration());
         //System.out.println(fc.upload("B","A"));
-        System.out.println(fc.rename("/A", "Test"));
+        //System.out.println(fc.rename("/A", "Test"));
         //System.out.println(fc.upload("B/D/E","A/B"));
         //System.out.println(fc.delete("B"));
         //System.out.println(fc.move("B","A"));
+        //System.out.println(fc.create("TestFolder", "A"));
+        System.out.println(fc.download("A", "B"));
 
     }
 }

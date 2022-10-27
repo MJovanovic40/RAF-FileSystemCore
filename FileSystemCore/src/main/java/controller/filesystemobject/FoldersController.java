@@ -24,8 +24,7 @@ public class FoldersController implements FSOController{
         File sourceFolder = new File(rootStorageLocation+targetPath);
         File destinationFolder = new File(rootStorageLocation + uploadPath);
         System.out.println(destinationFolder.toPath());
-        if(!sourceFolder.exists() || !sourceFolder.isDirectory() || !destinationFolder.exists() || !destinationFolder.isDirectory()) { //Validate input
-            System.out.println("Nije prosla prva validacija");
+        if(!sourceFolder.exists() || !sourceFolder.isDirectory() || !destinationFolder.exists() || !destinationFolder.isDirectory()) {
             return false;
         }
         long folderSize;
@@ -47,7 +46,6 @@ public class FoldersController implements FSOController{
         }
         String[] splitedFodlers = targetPath.split("/");
         Path finalPath = Paths.get(destinationFolder.toPath() + "/"+ splitedFodlers[splitedFodlers.length-1]);
-        // Proveri da li radi
         System.out.println("FINAL PATH = " + finalPath);
         if(finalPath.toFile().exists()){
             int c = 1;
@@ -59,9 +57,6 @@ public class FoldersController implements FSOController{
             finalPath = tempPath;
         }
         try {
-            /** ZIP MOZDA */
-            //Files.copy(sourceFolder.toPath(), finalPath); // Na isto mesto
-            //Files.move(sourceFolder.toPath(), finalPath); // Upload file
 
             FileUtils.copyDirectory(sourceFolder, finalPath.toFile());
         } catch (IOException e) {
@@ -73,12 +68,45 @@ public class FoldersController implements FSOController{
 
     @Override
     public boolean download(String targetPath, String downloadPath) {
-        return false;
+        File targetFolder = new File(this.rootStorageLocation + targetPath);
+        File downloadFolder = new File(this.rootStorageLocation + downloadPath);
+
+        if(!targetFolder.exists() || !targetFolder.isDirectory() || !downloadFolder.exists() || !downloadFolder.isDirectory()){
+            return false;
+        }
+        Path finalPath = Paths.get(downloadFolder + "/" + targetFolder.getName());
+
+        if(finalPath.toFile().exists()){
+            int c = 1;
+            Path tempPath = finalPath;
+            while(tempPath.toFile().exists()){
+                tempPath = Paths.get(finalPath.toString() + "(" + c + ")");
+                c++;
+            }
+            finalPath = tempPath;
+        }
+
+        try {
+            FileUtils.copyDirectory(targetFolder, finalPath.toFile());
+            return true;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public boolean create(String name, String path) {
-        return false;
+        if(name.isEmpty() || path.isEmpty()){
+            return false;
+        }
+        String newPath = this.rootStorageLocation + path + "/" + name;
+
+        File newFolder = new File(newPath);
+        if(newFolder.exists()){
+            return false;
+        }
+
+       return newFolder.mkdir();
     }
 
     @Override
@@ -90,7 +118,6 @@ public class FoldersController implements FSOController{
         }
         try {
             FileUtils.forceDelete(targetFolder);
-            //FileUtils.deleteDirectory(targetFolder);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -124,8 +151,7 @@ public class FoldersController implements FSOController{
         if(!targetFolder.exists() || !targetFolder.isDirectory() || name.isEmpty()){
             return false;
         }
-         File newPath = new File(targetFolder.toString().replace(targetFolder.getName(),name));
-        //Files.move(targetFolder, newPath.toPath().resolve(targetFolder.toString()), StandardCopyOption.REPLACE_EXISTING);
+        File newPath = new File(targetFolder.toString().replace(targetFolder.getName(),name));
         return targetFolder.renameTo(newPath);
     }
 
