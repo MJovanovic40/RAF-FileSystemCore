@@ -44,9 +44,9 @@ public class FoldersController implements FSOController{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        String[] splitedFodlers = targetPath.split("/");
-        Path finalPath = Paths.get(destinationFolder.toPath() + "/"+ splitedFodlers[splitedFodlers.length-1]);
-        System.out.println("FINAL PATH = " + finalPath);
+        String[] splitedFolders = targetPath.split("/");
+        Path finalPath = Paths.get(destinationFolder.toPath() + "/"+ splitedFolders[splitedFolders.length-1]);
+
         if(finalPath.toFile().exists()){
             int c = 1;
             Path tempPath = finalPath;
