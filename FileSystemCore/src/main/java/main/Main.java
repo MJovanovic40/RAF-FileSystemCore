@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args){
+    public static void main(String[] args) throws Exception {
         List<String> ext = new ArrayList<>();
         FileSystemCore fileSystemCore = new FileSystemCoreImplementation(100000, ext, 55);
 
@@ -27,7 +27,7 @@ public class Main {
         //System.out.println(fc.delete("B"));
         //System.out.println(fc.move("B","A"));
         //System.out.println(fc.create("TestFolder", "A"));
-        System.out.println(fc.download("A", "C:/Users/pc/Desktop"));
+        System.out.println(fc.download("A", "C:/Users/pc/Desktop/raf_storage/B"));
 
     }
 }

@@ -18,14 +18,26 @@ public class FoldersController implements FSOController{
         this.rootStorageLocation = rootStorageLocation;
         this.configuration = configuration;
     }
+
+    /**
+     * Uploads a folder to the Storage
+     *
+     * @param targetPath an absolute path to the folder to be uploaded
+     * @param uploadPath an absolute storage path where the folder will be uploaded
+     * @return true if the folder is uploaded successfully
+     * @throws Exception when the source folder and destination folder do not exist and when size exceeds given memory
+     */
     @Override
-    public boolean upload(String targetPath, String uploadPath) {
+    public boolean upload(String targetPath, String uploadPath) throws Exception {
 
         File sourceFolder = new File(rootStorageLocation+targetPath);
         File destinationFolder = new File(rootStorageLocation + uploadPath);
         System.out.println(destinationFolder.toPath());
-        if(!sourceFolder.exists() || !sourceFolder.isDirectory() || !destinationFolder.exists() || !destinationFolder.isDirectory()) {
-            return false;
+        if(!sourceFolder.exists() || !sourceFolder.isDirectory()) {
+            throw new Exception("Source folder does not exist.");
+        }
+        if(!destinationFolder.exists() || !destinationFolder.isDirectory()){
+            throw new Exception("Destination folder does not exist.");
         }
         long folderSize;
         try {
@@ -37,7 +49,7 @@ public class FoldersController implements FSOController{
 
         try {
             if(Files.size(Paths.get(this.rootStorageLocation)) + folderSize > this.configuration.getStorageSize()){
-                return false;
+                throw new Exception("Exceeds given memory.");
             }
 
 
@@ -66,13 +78,24 @@ public class FoldersController implements FSOController{
 
     }
 
+    /**
+     * Downloads a folder from the storage to a specified location
+     *
+     * @param targetPath an absolute storage path to the folder for download
+     * @param downloadPath an absolute path to the download location (outside the storage)
+     * @return true if the folder is downloaded
+     * @throws Exception when target folder and download folder do not exist
+     */
     @Override
-    public boolean download(String targetPath, String downloadPath) {
+    public boolean download(String targetPath, String downloadPath) throws Exception {
         File targetFolder = new File(this.rootStorageLocation + targetPath);
         File downloadFolder = new File(downloadPath);
 
-        if(!targetFolder.exists() || !targetFolder.isDirectory() || !downloadFolder.exists() || !downloadFolder.isDirectory()){
-            return false;
+        if(!targetFolder.exists() || !targetFolder.isDirectory()){
+            throw new Exception("Target folder does not exist.");
+        }
+        if(!downloadFolder.exists() || !downloadFolder.isDirectory()){
+            throw new Exception("Download folder does not exist.");
         }
         Path finalPath = Paths.get(downloadFolder + "/" + targetFolder.getName());
 
@@ -94,27 +117,42 @@ public class FoldersController implements FSOController{
         }
     }
 
+    /**
+     * Creates a new folder
+     *
+     * @param name the name of the new folder
+     * @param path an absolute storage path to the new file's directory
+     * @return true if the file is created
+     * @throws Exception when name or path do not exist and when the folder already exists
+     */
     @Override
-    public boolean create(String name, String path) {
+    public boolean create(String name, String path) throws Exception {
         if(name.isEmpty() || path.isEmpty()){
-            return false;
+            throw new Exception("Invalid input arguments.");
         }
         String newPath = this.rootStorageLocation + path + "/" + name;
 
         File newFolder = new File(newPath);
         if(newFolder.exists()){
-            return false;
+            throw new Exception("Folder already exists.");
         }
 
        return newFolder.mkdir();
     }
 
+    /**
+     * Deletes a folder from storage
+     *
+     * @param path an absolute storage path to the folder
+     * @return true if file is deleted
+     * @throws Exception when the given folder does not exist
+     */
     @Override
-    public boolean delete(String path) {
+    public boolean delete(String path) throws Exception {
 
         File targetFolder = new File(rootStorageLocation+path);
         if(!targetFolder.exists()){
-            return false;
+            throw new Exception("Target folder does not exist.");
         }
         try {
             FileUtils.forceDelete(targetFolder);
@@ -124,14 +162,25 @@ public class FoldersController implements FSOController{
         return true;
     }
 
+    /**
+     * Moves a folder to another location within the storage
+     *
+     * @param targetPath an absolute storage path to the folder
+     * @param movePath an absolute storage path to the target directory
+     * @return true if the file is moved
+     * @throws Exception when the target folder and target destination do not exist
+     */
     @Override
-    public boolean move(String targetPath, String movePath) {
+    public boolean move(String targetPath, String movePath) throws Exception {
 
         File targetFolder = new File(this.rootStorageLocation + targetPath);
         File moveDir = new File(this.rootStorageLocation + movePath);
 
-        if(!targetFolder.exists() || !targetFolder.isDirectory() || !moveDir.exists() || !moveDir.isDirectory()){
-            return false;
+        if(!targetFolder.exists() || !targetFolder.isDirectory()){
+            throw new Exception("Target folder does not exist.");
+        }
+        if(!moveDir.exists() || !moveDir.isDirectory()){
+            throw new Exception("Target destination does not exist.");
         }
         File folderLoc = new File(moveDir.toPath() + "/" + targetFolder.getName());
 
@@ -144,12 +193,20 @@ public class FoldersController implements FSOController{
         return true;
     }
 
+    /**
+     * Renames the provided folder to the provided name
+     *
+     * @param path an absolute storage path to the folder
+     * @param name a new folder name (with extension)
+     * @return true if the file is renamed
+     * @throws Exception when the target folder does not exist
+     */
     @Override
-    public boolean rename(String path, String name) {
+    public boolean rename(String path, String name) throws Exception {
 
         File targetFolder = new File(this.rootStorageLocation + path);
         if(!targetFolder.exists() || !targetFolder.isDirectory() || name.isEmpty()){
-            return false;
+            throw new Exception("Target folder does not exist.");
         }
         File newPath = new File(targetFolder.toString().replace(targetFolder.getName(),name));
         return targetFolder.renameTo(newPath);

@@ -18,6 +18,7 @@ public class SearchControllerImplementation implements SearchController{
 
     @Override
     public List<File> getAllFiles(String path) {
+
         return null;
     }
 
