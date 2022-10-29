@@ -27,12 +27,13 @@ public class FilesController implements FSOController{
      */
     @Override
 
-    public boolean upload(String targetPath, String uploadPath) {
+    public boolean upload(String targetPath, String uploadPath) throws Exception {
         File targetFile = new File(targetPath);
         File targetDirectory = new File(rootStorageLocation + uploadPath); // Predpostavljamo da ce uploadPath imati "/" na pocetku
 
         if(!targetFile.exists() || !targetFile.isFile() || !targetDirectory.exists() || !targetDirectory.isDirectory()) { //Validate input
-            return false;
+
+            throw new Exception("Invalid input provided.");
         }
 
         //Check configuration
@@ -45,19 +46,19 @@ public class FilesController implements FSOController{
         }
 
         if(this.configuration.getForbiddenExtensions().contains(extension)){
-            return false;
+            throw new Exception("Extension not allowed.");
         }
 
         try {
             if(Files.size(Paths.get(this.rootStorageLocation)) + fileSize > this.configuration.getStorageSize()){
-                return false;
+                throw new Exception("Storage size exceeded.");
             }
 
             if(getFilesCount(new File(this.rootStorageLocation)) >= this.configuration.getMaximumNumberOfFiles()){
-                return false;
+                throw new Exception("Number of files exceeded.");
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new Exception("Error.");
         }
 
         Path finalPath = Paths.get(targetDirectory.toPath() + "/" + targetFile.toPath().getFileName());
@@ -75,7 +76,7 @@ public class FilesController implements FSOController{
         try {
             Files.copy(targetFile.toPath(), finalPath); // Upload file
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new Exception("Error.");
         }
         return true;
     }
@@ -88,12 +89,12 @@ public class FilesController implements FSOController{
      * @return true if the file is downloaded, false otherwise
      */
     @Override
-    public boolean download(String targetPath, String downloadPath) {
+    public boolean download(String targetPath, String downloadPath) throws Exception {
         File targetFile = new File(this.rootStorageLocation + targetPath);
         File downloadFile = new File(downloadPath);
 
         if(!targetFile.exists() || !targetFile.isFile() || !downloadFile.exists() || !downloadFile.isDirectory()){ //Validate input
-            return false;
+            throw new Exception("Invalid input provided.");
         }
 
         Path finalPath = Paths.get(downloadFile + "/" + targetFile.getName());
@@ -125,9 +126,9 @@ public class FilesController implements FSOController{
      * @return true if the file is created, false otherwise
      */
     @Override
-    public boolean create(String name, String path) {
+    public boolean create(String name, String path) throws Exception {
         if(name.isEmpty() || path.isEmpty()){
-            return false;
+            throw new Exception("Invalid Input Provided.");
         }
 
         String newPath = this.rootStorageLocation + path + "/" + name;
@@ -137,23 +138,23 @@ public class FilesController implements FSOController{
         //Check configuration
         //We don't need to check for file size because a newly created file will always be 0 bytes
         if(extension.isEmpty() || this.configuration.getForbiddenExtensions().contains(extension)){ // Check extension
-            return false;
+            throw new Exception("Extension not allowed.");
         }
 
         if(getFilesCount(new File(this.rootStorageLocation)) >= this.configuration.getMaximumNumberOfFiles()){ // Check if the file is allowed to be created
-            return false;
+            throw new Exception("Number of files exceeded.");
         }
 
         File newFile = new File(newPath);
 
         if(newFile.exists()){ //Check if file already exists
-            return false;
+            throw new Exception("File already exists.");
         }
 
         try {
             return newFile.createNewFile();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new Exception("Error.");
         }
     }
 
@@ -164,12 +165,12 @@ public class FilesController implements FSOController{
      * @return true if file is deleted, false otherwise
      */
     @Override
-    public boolean delete(String path) {
+    public boolean delete(String path) throws Exception {
 
         File targetFile = new File(this.rootStorageLocation + path);
 
         if(!targetFile.exists()) // Validate input
-            return false;
+            throw new Exception("Target file doesen't exist.");
 
         return targetFile.delete();
     }
@@ -182,14 +183,14 @@ public class FilesController implements FSOController{
      * @return true if the file is moved, false otherwise
      */
     @Override
-    public boolean move(String targetPath, String movePath) {
+    public boolean move(String targetPath, String movePath) throws Exception {
 
         File targetFile = new File(this.rootStorageLocation + targetPath);
         File moveDir = new File(this.rootStorageLocation + movePath);
 
 
         if(!targetFile.exists() || !targetFile.isFile() || !moveDir.exists() || !moveDir.isDirectory()){ // Validate input
-            return false;
+            throw new Exception("Invalid input.");
         }
 
         File finalFile = new File(moveDir.toPath() + "/" + targetFile.getName());
@@ -211,18 +212,18 @@ public class FilesController implements FSOController{
      * @return true if the file is renamed, false otherwise
      */
     @Override
-    public boolean rename(String path, String name) {
+    public boolean rename(String path, String name) throws Exception {
 
         File targetFile = new File(this.rootStorageLocation + path);
 
         if(!targetFile.exists() || !targetFile.isFile() || name.isEmpty()){ // Validate input
-            return false;
+            throw new Exception("Invalid input.");
         }
 
         String newPath = targetFile.toString().replace(targetFile.getName(), name); // Create a new path with the new file name
 
         if(this.configuration.getForbiddenExtensions().contains(getExtension(newPath))){ // Check if the new name (mainly extension) fits the configuration settings
-            return false;
+            throw new Exception("Extension not allowed.");
         }
 
         return targetFile.renameTo(new File(newPath));

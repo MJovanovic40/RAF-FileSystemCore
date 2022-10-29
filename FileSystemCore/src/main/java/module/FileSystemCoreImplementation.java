@@ -64,32 +64,32 @@ public class FileSystemCoreImplementation implements FileSystemCore{
     }
 
     @Override
-    public boolean uploadFile(String targetPath, String uploadPath) {
+    public boolean uploadFile(String targetPath, String uploadPath) throws Exception {
         return this.filesController.upload(targetPath, uploadPath);
     }
 
     @Override
-    public boolean downloadFile(String targetPath, String downloadPath) {
+    public boolean downloadFile(String targetPath, String downloadPath) throws Exception {
         return this.filesController.download(targetPath, downloadPath);
     }
 
     @Override
-    public boolean createFile(String name, String path) {
+    public boolean createFile(String name, String path) throws Exception {
         return this.filesController.create(name, path);
     }
 
     @Override
-    public boolean deleteFile(String path) {
+    public boolean deleteFile(String path) throws Exception {
         return this.filesController.delete(path);
     }
 
     @Override
-    public boolean moveFile(String targetPath, String movePath) {
+    public boolean moveFile(String targetPath, String movePath) throws Exception {
         return this.filesController.move(targetPath, movePath);
     }
 
     @Override
-    public boolean renameFile(String path, String name) {
+    public boolean renameFile(String path, String name) throws Exception {
         return this.filesController.rename(path, name);
     }
 }
