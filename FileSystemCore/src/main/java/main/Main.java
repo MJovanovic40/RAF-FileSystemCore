@@ -27,7 +27,7 @@ public class Main {
         //System.out.println(fc.delete("B"));
         //System.out.println(fc.move("B","A"));
         //System.out.println(fc.create("TestFolder", "A"));
-        System.out.println(fc.download("A", "B"));
+        System.out.println(fc.download("A", "C:/Users/pc/Desktop"));
 
     }
 }

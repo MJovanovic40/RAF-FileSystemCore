@@ -69,7 +69,7 @@ public class FoldersController implements FSOController{
     @Override
     public boolean download(String targetPath, String downloadPath) {
         File targetFolder = new File(this.rootStorageLocation + targetPath);
-        File downloadFolder = new File(this.rootStorageLocation + downloadPath);
+        File downloadFolder = new File(downloadPath);
 
         if(!targetFolder.exists() || !targetFolder.isDirectory() || !downloadFolder.exists() || !downloadFolder.isDirectory()){
             return false;
