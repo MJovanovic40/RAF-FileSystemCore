@@ -1,7 +1,6 @@
 package controller.search;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 
 public interface SearchController {
