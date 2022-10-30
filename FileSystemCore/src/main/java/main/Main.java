@@ -1,10 +1,13 @@
 package main;
 
 import controller.filesystemobject.FoldersController;
+import controller.search.SearchControllerImplementation;
 import model.Configuration;
 import module.FileSystemCore;
 import module.FileSystemCoreImplementation;
 
+import java.io.File;
+import java.net.StandardSocketOptions;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +30,22 @@ public class Main {
         //System.out.println(fc.delete("B"));
         //System.out.println(fc.move("B","A"));
         //System.out.println(fc.create("TestFolder", "A"));
-        System.out.println(fc.download("A", "C:/Users/pc/Desktop/raf_storage/B"));
+        //System.out.println(fc.download("A", "C:/Users/pc/Desktop/raf_storage/B"));
+        SearchControllerImplementation searchControllerImplementation = new SearchControllerImplementation(null,null);
+//        for(File f : searchControllerImplementation.getAllFiles(rootLocation)){
+//               System.out.println(f.getName());
+//            }
+//        System.out.println("Fajlovi i prvi podfolderi");
+//        for(File f : searchControllerImplementation.getAllFilesFromSubdirectories(rootLocation)){
+//            System.out.println(f.getName());
+//        }
 
+        for(File f : searchControllerImplementation.getAllFilesFromDirectory(rootLocation+"")){
+               System.out.println(f.getName());
+            }
+        System.out.println("--------------------------------------------------------");
+        for(File f : searchControllerImplementation.getAllFilesWithExtension(rootLocation,"bmp")){
+            System.out.println(f.getName());
+        }
     }
 }
