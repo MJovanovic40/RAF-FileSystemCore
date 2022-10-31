@@ -2,6 +2,10 @@ package module;
 
 import controller.filesystemobject.FSOController;
 import controller.filesystemobject.FilesController;
+import controller.search.SearchController;
+import controller.search.SearchControllerFactory;
+import enums.SortCriteria;
+import enums.SortOrder;
 import model.Configuration;
 
 import java.io.File;
@@ -91,5 +95,35 @@ public class FileSystemCoreImplementation implements FileSystemCore{
     @Override
     public boolean renameFile(String path, String name) throws Exception {
         return this.filesController.rename(path, name);
+    }
+
+    @Override
+    public List<File> getAllFilesLikeName(String name, SortCriteria sortCriteria, SortOrder sortOrder) {
+        SearchController searchController = SearchControllerFactory.createSearchController(this.storagePath.toString(), sortCriteria, sortOrder);
+        return searchController.getAllFilesLikeName(name);
+    }
+
+    @Override
+    public boolean directoryContainsFile(String path, String name) throws Exception {
+        SearchController searchController = SearchControllerFactory.createSearchController(this.storagePath.toString(), SortCriteria.FILE_NAME, SortOrder.ASCENDING);
+        return searchController.directoryContainsFile(path, name);
+    }
+
+    @Override
+    public boolean directoryContainsFiles(String path, List<String> names, boolean strictMode) throws Exception {
+        SearchController searchController = SearchControllerFactory.createSearchController(this.storagePath.toString(), SortCriteria.FILE_NAME, SortOrder.ASCENDING);
+        return searchController.directoryContainsFiles(path, names, strictMode);
+    }
+
+    @Override
+    public String getFilePath(String name) {
+        SearchController searchController = SearchControllerFactory.createSearchController(this.storagePath.toString(), SortCriteria.FILE_NAME, SortOrder.ASCENDING);
+        return searchController.getFilePath(name);
+    }
+
+    @Override
+    public List<File> getFilesModifiedAt(String path, long modifiedAt, SortCriteria sortCriteria, SortOrder sortOrder) throws Exception {
+        SearchController searchController = SearchControllerFactory.createSearchController(this.storagePath.toString(), sortCriteria, sortOrder);
+        return searchController.getFilesModifiedAt(path, modifiedAt);
     }
 }
