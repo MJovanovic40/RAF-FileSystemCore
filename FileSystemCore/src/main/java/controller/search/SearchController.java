@@ -10,8 +10,8 @@ public interface SearchController {
     List<File> getAllFilesWithExtension(String path, String extension);
 
     List<File> getAllFilesLikeName(String name);
-    boolean directoryContainsFile(String path, String name);
-    boolean directoryContainsFiles(String path, List<String> names, boolean strictMode);
+    boolean directoryContainsFile(String path, String name) throws Exception;
+    boolean directoryContainsFiles(String path, List<String> names, boolean strictMode) throws Exception;
     String getFilePath(String name);
-    List<File> getFilesModifiedAt(String modifiedAt);
+    List<File> getFilesModifiedAt(String path, long modifiedAt) throws Exception;
 }

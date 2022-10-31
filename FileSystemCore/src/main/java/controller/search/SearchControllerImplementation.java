@@ -3,27 +3,32 @@ package controller.search;
 import controller.filesystemobject.FilesController;
 import enums.SortCriteria;
 import enums.SortOrder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
+@Setter
+@Getter
 public class SearchControllerImplementation implements SearchController{
 
     private SortOrder sortOrder;
     private SortCriteria sortCriteria;
 
-    public SearchControllerImplementation(SortCriteria sortCriteria, SortOrder sortOrder){
+    private final String rootStorageLocation;
+
+    public SearchControllerImplementation(String rootStorageLocation, SortCriteria sortCriteria, SortOrder sortOrder){
         this.sortCriteria = sortCriteria;
         this.sortOrder = sortOrder;
+        this.rootStorageLocation = rootStorageLocation;
     }
 
     @Override
     public List<File> getAllFiles(String path) {
 
-        File file = new File(path);
+        File file = new File(this.rootStorageLocation + path);
         File[] directories = file.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
@@ -117,32 +122,150 @@ public class SearchControllerImplementation implements SearchController{
     public List<File> getAllFilesWithExtension(String path, String extension) {
         List<File> result = new ArrayList<>();
         recursiveFileWalk( path, result,extension);
-        return result;
-
+        return sortFiles(result);
     }
 
     @Override
     public List<File> getAllFilesLikeName(String name) {
-        return null;
+        List<File> files = allFiles(new File(this.rootStorageLocation + "/"), null);
+        List<File> result = new ArrayList<>();
+        for(File file: files){
+
+            if(file.getName().contains(name)){
+                result.add(file);
+            }
+        }
+        return sortFiles(result);
     }
 
     @Override
-    public boolean directoryContainsFile(String path, String name) {
+    public boolean directoryContainsFile(String path, String name) throws Exception {
+        File targetDir = new File(this.rootStorageLocation + path);
+
+        if(!targetDir.exists() || !targetDir.isDirectory()) {
+            throw new Exception("Invalid input provided.");
+        }
+
+        File[] files = targetDir.listFiles();
+
+        if(files == null) {
+            throw new Exception("NullPointer Error");
+        }
+
+        for(File file: files) {
+            if (file.getName().equals(name)) {
+                return true;
+            }
+        }
         return false;
     }
 
     @Override
-    public boolean directoryContainsFiles(String path, List<String> names, boolean strictMode) {
-        return false;
+    public boolean directoryContainsFiles(String path, List<String> names, boolean strictMode) throws Exception {
+        File targetDir = new File(this.rootStorageLocation + path);
+
+        if(!targetDir.exists() || !targetDir.isDirectory()) {
+            throw new Exception("Invalid input provided.");
+        }
+
+        File[] files = targetDir.listFiles();
+
+        if(files == null) {
+            throw new Exception("NullPointer Error");
+        }
+
+        Set<String> usedNames = new HashSet<>();
+
+        for(File file: files) {
+            for(String name: names){
+                if(file.getName().equals(name)){
+                    if(strictMode){
+                        usedNames.add(name);
+                    } else{
+                        return true;
+                    }
+                }
+            }
+        }
+        return strictMode && usedNames.size() == names.size();
     }
 
     @Override
     public String getFilePath(String name) {
-        return null;
+
+        List<File> files = allFiles(new File(this.rootStorageLocation + "/"), null);
+
+        for(File file: files){
+            if(file.getName().equals(name)){
+                return file.getAbsolutePath().replace(this.rootStorageLocation, "");
+            }
+        }
+
+        return "";
     }
 
     @Override
-    public List<File> getFilesModifiedAt(String modifiedAt) {
-        return null;
+    public List<File> getFilesModifiedAt(String path, long modifiedAt) throws Exception {
+        File targetDir = new File(this.rootStorageLocation + path);
+
+        if(!targetDir.exists() || !targetDir.isDirectory()) {
+            throw new Exception("Invalid input provided.");
+        }
+
+        List<File> result = new ArrayList<>();
+
+        File[] files = targetDir.listFiles();
+
+        if(files == null){
+            return result;
+        }
+        for(File file: files){
+            if(file.isFile() && file.lastModified() >= modifiedAt*1000){
+                result.add(file);
+            }
+        }
+
+        return sortFiles(result);
     }
+
+    public List<File> allFiles(File path, List<File> files){
+        if(files == null){
+            files = new ArrayList<>();
+        }
+        if(!path.exists()){
+            return files;
+        }
+
+        File[] filesAndDirectories = path.listFiles();
+
+        if(filesAndDirectories == null){
+            return files;
+        }
+
+        for(File f: filesAndDirectories){
+            if(f.isDirectory()){
+                allFiles(f, files);
+            } else{
+                files.add(f);
+            }
+        }
+        return files;
+
+    }
+
+    private List<File> sortFiles(List<File> files){
+        switch(this.sortCriteria){
+            case FILE_NAME:
+                files.sort(Comparator.comparing(File::getName));
+                break;
+            case MODIFIED_AT:
+                files.sort(Comparator.comparing(File::lastModified));
+                break;
+        }
+        if(this.sortOrder == SortOrder.DESCENDING)
+            Collections.reverse(files);
+
+        return files;
+    }
+
 }
