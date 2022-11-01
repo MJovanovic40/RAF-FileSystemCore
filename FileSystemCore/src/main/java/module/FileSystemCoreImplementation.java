@@ -1,6 +1,7 @@
 package module;
 
 import controller.filesystemobject.FSOController;
+import controller.filesystemobject.FSOControllerFactory;
 import controller.filesystemobject.FilesController;
 import controller.search.SearchController;
 import controller.search.SearchControllerFactory;
@@ -62,7 +63,7 @@ public class FileSystemCoreImplementation implements FileSystemCore{
 
         this.configuration.load(this.storagePath.toString());
 
-        this.filesController = new FilesController(this.storagePath.toString(), this.configuration);
+        this.filesController = FSOControllerFactory.createFSOController("files", this.storagePath.toString(), this.configuration);
 
         System.out.println(this.configuration);
     }

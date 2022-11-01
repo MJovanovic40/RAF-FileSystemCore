@@ -42,13 +42,13 @@ public class SearchControllerImplementation implements SearchController{
             }
         }
 
-        return result;
+        return sortFiles(result);
     }
 
 
     @Override
     public List<File> getAllFilesFromSubdirectories(String path) {
-        File file = new File(path);
+        File file = new File(this.rootStorageLocation + path);
         File[] directories = file.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
@@ -69,14 +69,14 @@ public class SearchControllerImplementation implements SearchController{
             }else
                 result.add(directory);
         }
-        return result;
+        return sortFiles(result);
     }
 
     @Override
     public List<File> getAllFilesFromDirectory(String path) {
         List<File> result = new ArrayList<>();
-        recursiveFileWalk( path, result,null);
-        return result;
+        recursiveFileWalk( this.rootStorageLocation + path, result,null);
+        return sortFiles(result);
     }
 
     private void recursiveFileWalk( String path, List<File> list, String extension){
@@ -121,7 +121,7 @@ public class SearchControllerImplementation implements SearchController{
     @Override
     public List<File> getAllFilesWithExtension(String path, String extension) {
         List<File> result = new ArrayList<>();
-        recursiveFileWalk( path, result,extension);
+        recursiveFileWalk( this.rootStorageLocation + path, result,extension);
         return sortFiles(result);
     }
 
