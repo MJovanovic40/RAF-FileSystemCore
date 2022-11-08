@@ -8,6 +8,7 @@ import controller.search.SearchControllerFactory;
 import enums.SortCriteria;
 import enums.SortOrder;
 import model.Configuration;
+import model.FolderConfiguration;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -22,11 +23,13 @@ public class FileSystemCoreImplementation implements FileSystemCore{
 
     private FSOController filesController;
 
+    private FolderConfiguration folderConfiguration;
     public FileSystemCoreImplementation(){
         String desktopPath = System.getProperty("user.home") + "/Desktop";
         String storageFolderName = "raf_storage";
 
         this.configuration = new Configuration();
+        this.folderConfiguration = new FolderConfiguration();
         this.storagePath = Paths.get(desktopPath + "/" + storageFolderName); // Default path je na desktop-u
         initialize();
 
@@ -34,12 +37,14 @@ public class FileSystemCoreImplementation implements FileSystemCore{
     }
     public FileSystemCoreImplementation(String path){
         this.configuration = new Configuration();
+        this.folderConfiguration = new FolderConfiguration();
         this.storagePath = Paths.get(path);
         initialize();
     }
 
     public FileSystemCoreImplementation(int storageSize, List<String> forbiddenExtensions, int maximumNumberOfFiles){
         this.configuration = new Configuration(storageSize, forbiddenExtensions, maximumNumberOfFiles);
+        this.folderConfiguration = new FolderConfiguration();
         String desktopPath = System.getProperty("user.home") + "/Desktop";
         String storageFolderName = "raf_storage";
         this.storagePath = Paths.get(desktopPath + "/" + storageFolderName); // Default path je na desktop-u
@@ -48,6 +53,7 @@ public class FileSystemCoreImplementation implements FileSystemCore{
 
     public FileSystemCoreImplementation(String path, int storageSize, List<String> forbiddenExtensions, int maximumNumberOfFiles){
         this.configuration = new Configuration(storageSize, forbiddenExtensions, maximumNumberOfFiles);
+        this.folderConfiguration = new FolderConfiguration();
         this.storagePath = Paths.get(path);
         initialize();
     }
@@ -63,7 +69,7 @@ public class FileSystemCoreImplementation implements FileSystemCore{
 
         this.configuration.load(this.storagePath.toString());
 
-        this.filesController = FSOControllerFactory.createFSOController("files", this.storagePath.toString(), this.configuration);
+        this.filesController = FSOControllerFactory.createFSOController("files", this.storagePath.toString(), this.configuration, this.folderConfiguration);
 
         System.out.println(this.configuration);
     }

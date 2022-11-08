@@ -1,6 +1,7 @@
 package controller.filesystemobject;
 
 import model.Configuration;
+import model.FolderConfiguration;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -13,10 +14,12 @@ import java.nio.file.Paths;
 public class FoldersController implements FSOController{
     private final String rootStorageLocation;
     private final Configuration configuration;
+    private final FolderConfiguration folderConfiguration;
 
-    public FoldersController(String rootStorageLocation, Configuration configuration){
+    public FoldersController(String rootStorageLocation, Configuration configuration, FolderConfiguration folderConfiguration){
         this.rootStorageLocation = rootStorageLocation;
         this.configuration = configuration;
+        this.folderConfiguration = folderConfiguration;
     }
 
     /**
@@ -123,7 +126,7 @@ public class FoldersController implements FSOController{
      * @param name the name of the new folder
      * @param path an absolute storage path to the new file's directory
      * @return true if the file is created
-     * @throws Exception when name or path do not exist and when the folder already exists
+     * @throws Exception when name or path do not exist and when the folder already exists and when files go over the set limit
      */
     @Override
     public boolean create(String name, String path) throws Exception {
@@ -133,11 +136,18 @@ public class FoldersController implements FSOController{
         String newPath = this.rootStorageLocation + path + "/" + name;
 
         File newFolder = new File(newPath);
-        if(newFolder.exists()){
-            throw new Exception("Folder already exists.");
+        int limit = this.folderConfiguration.getFolderCountLimit(newPath);
+        int currentFilesCount = folderConfiguration.getFilesCount(newFolder);
+        if( limit > currentFilesCount){
+            if(newFolder.exists()){
+                throw new Exception("Folder already exists.");
+            }
+
+           return newFolder.mkdir();
+        }else{
+            throw new Exception("Folder exceeds limit.");
         }
 
-       return newFolder.mkdir();
     }
 
     /**

@@ -1,6 +1,7 @@
 package controller.filesystemobject;
 
 import model.Configuration;
+import model.FolderConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,10 +13,12 @@ public class FilesController implements FSOController{
 
     private final String rootStorageLocation;
     private final Configuration configuration;
+    private final FolderConfiguration folderConfiguration;
 
-    public FilesController(String rootStorageLocation, Configuration configuration){
+    public FilesController(String rootStorageLocation, Configuration configuration, FolderConfiguration folderConfiguration){
         this.rootStorageLocation = rootStorageLocation;
         this.configuration = configuration;
+        this.folderConfiguration=folderConfiguration;
     }
 
     /**
@@ -31,6 +34,9 @@ public class FilesController implements FSOController{
         File targetFile = new File(targetPath);
         File targetDirectory = new File(rootStorageLocation + uploadPath); // Predpostavljamo da ce uploadPath imati "/" na pocetku
 
+        if(this.folderConfiguration.getFilesCount(targetDirectory) >= this.folderConfiguration.getFolderCountLimit(rootStorageLocation+uploadPath)){
+            throw new Exception("File count limit exceeded.");
+        }
         if(!targetFile.exists() || !targetFile.isFile() || !targetDirectory.exists() || !targetDirectory.isDirectory()) { //Validate input
 
             throw new Exception("Invalid input provided.");
@@ -145,6 +151,10 @@ public class FilesController implements FSOController{
             throw new Exception("Number of files exceeded.");
         }
 
+        if(this.folderConfiguration.getFilesCount(new File( this.rootStorageLocation + path)) >= this.folderConfiguration.getFolderCountLimit( this.rootStorageLocation + path)){
+            throw new Exception("File count limit exceeded.");
+        }
+
         File newFile = new File(newPath);
 
         if(newFile.exists()){ //Check if file already exists
@@ -191,6 +201,10 @@ public class FilesController implements FSOController{
 
         if(!targetFile.exists() || !targetFile.isFile() || !moveDir.exists() || !moveDir.isDirectory()){ // Validate input
             throw new Exception("Invalid input.");
+        }
+
+        if(this.folderConfiguration.getFilesCount(new File( this.rootStorageLocation + movePath)) >= this.folderConfiguration.getFolderCountLimit( this.rootStorageLocation + movePath)){
+            throw new Exception("File count limit exceeded.");
         }
 
         File finalFile = new File(moveDir.toPath() + "/" + targetFile.getName());
